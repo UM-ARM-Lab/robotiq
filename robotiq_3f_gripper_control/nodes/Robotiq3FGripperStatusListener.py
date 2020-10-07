@@ -41,7 +41,7 @@ Command-line interface for receiving and interpreting the status of a 3F gripper
 This serves as an example for receiving messages from the 'Robotiq3FGripperRobotInput' topic using the 'Robotiq3FGripper_robot_input' msg type and interpreting the corresponding status of the 3F gripper gripper.
 """
 
-from __future__ import print_function
+
 
 import roslib;
 

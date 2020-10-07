@@ -42,7 +42,7 @@ Command-line interface for sending simple commands to a ROS node controlling a 3
 This serves as an example for publishing messages on the 'Robotiq3FGripperRobotOutput' topic using the 'Robotiq3FGripper_robot_output' msg type for sending commands to a 3F gripper gripper. In this example, only the simple control mode is implemented. For using the advanced control mode, please refer to the Robotiq support website (support.robotiq.com).
 """
 
-from __future__ import print_function
+
 
 import roslib;
 
@@ -161,7 +161,7 @@ def askForCommand(command):
 
     strAskForCommand += '-->'
 
-    return raw_input(strAskForCommand)
+    return input(strAskForCommand)
 
 
 def publisher():
