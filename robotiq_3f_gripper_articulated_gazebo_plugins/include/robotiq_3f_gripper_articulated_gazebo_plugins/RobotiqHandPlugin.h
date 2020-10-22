@@ -55,9 +55,6 @@
 class RobotiqHandPlugin : public gazebo::ModelPlugin
 {
 
-
-  friend class gazebo::common::PID;
-
   /// \brief Hand states.
   enum State
   {
@@ -78,6 +75,7 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
     Scissor
   };
 
+ public:
   RobotiqHandPlugin();
 
   ~RobotiqHandPlugin() override;
