@@ -39,7 +39,7 @@ const std::string RobotiqHandPlugin::DefaultRightTopicState = "/right_hand/state
 RobotiqHandPlugin::RobotiqHandPlugin()
 {
   // PID default parameters.
-  for (auto & i : posePID)
+  for (auto &i : posePID)
   {
     i.Init(1.0, 0, 0.5, 0.0, 0.0, 60.0, -60.0);
     i.SetCmd(0.0);
@@ -55,9 +55,6 @@ RobotiqHandPlugin::RobotiqHandPlugin()
 ////////////////////////////////////////////////////////////////////////////////
 RobotiqHandPlugin::~RobotiqHandPlugin()
 {
-#if GAZEBO_MAJOR_VERSION < 9
-  gazebo::event::Events::DisconnectWorldUpdateBegin(updateConnection);
-#endif
   rosNode->shutdown();
   rosQueue.clear();
   rosQueue.disable();
@@ -85,13 +82,18 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr _parent,
   // Load the vector of all joints.
   std::string prefix;
   if (side == "left")
+  {
     prefix = "l_";
-  else
+  } else
+  {
     prefix = "r_";
+  }
 
   // Load the vector of all joints.
   if (!FindJoints())
+  {
     return;
+  }
 
   // Initialize joint state vector.
   jointStates.name.resize(jointNames.size());
@@ -123,10 +125,14 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr _parent,
 
     // Overload the PID parameters if they are available.
     if (sdf->HasElement("kp_position"))
+    {
       posePID[i].SetPGain(sdf->Get<double>("kp_position"));
+    }
 
     if (sdf->HasElement("ki_position"))
+    {
       posePID[i].SetIGain(sdf->Get<double>("ki_position"));
+    }
 
     if (sdf->HasElement("kd_position"))
     {
@@ -136,18 +142,29 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr _parent,
     }
 
     if (sdf->HasElement("position_effort_min"))
+    {
       posePID[i].SetCmdMin(sdf->Get<double>("position_effort_min"));
+    }
 
     if (sdf->HasElement("position_effort_max"))
+    {
       posePID[i].SetCmdMax(sdf->Get<double>("position_effort_max"));
+    }
+
   }
 
   // Overload the ROS topics for the hand if they are available.
   if (sdf->HasElement("topic_command"))
+  {
     controlTopicName = sdf->Get<std::string>("topic_command");
+  }
+
 
   if (sdf->HasElement("topic_state"))
+  {
     stateTopicName = sdf->Get<std::string>("topic_state");
+  }
+
 
   // Initialize ROS.
   if (!ros::isInitialized())
@@ -166,42 +183,31 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr _parent,
 
   // Broadcasts state.
   pubHandleStateQueue = pmq.addPub<robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotInput>();
-  pubHandleState = rosNode->advertise<robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotInput>(
-      stateTopicName, 100, true);
+  pubHandleState = rosNode->advertise<robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotInput>(stateTopicName,
+                                                                                                       100, true);
 
   // Broadcast joint state.
   std::string topicBase = std::string("robotiq_hands/") + side;
   pubJointStatesQueue = pmq.addPub<sensor_msgs::JointState>();
-  pubJointStates = rosNode->advertise<sensor_msgs::JointState>(
-      topicBase + std::string("_hand/joint_states"), 10);
+  pubJointStates = rosNode->advertise<sensor_msgs::JointState>(topicBase + std::string("_hand/joint_states"), 10);
 
   // Subscribe to user published handle control commands.
-  ros::SubscribeOptions handleCommandSo =
-      ros::SubscribeOptions::create<robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotOutput>(
-          controlTopicName, 100,
-          boost::bind(&RobotiqHandPlugin::SetHandleCommand, this, _1),
-          ros::VoidPtr(), &rosQueue);
+  ros::SubscribeOptions handleCommandSo = ros::SubscribeOptions::create<robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotOutput>(
+      controlTopicName, 100, boost::bind(&RobotiqHandPlugin::SetHandleCommand, this, _1), ros::VoidPtr(), &rosQueue);
 
   // Enable TCP_NODELAY since TCP causes bursty communication with high jitter.
-  handleCommandSo.transport_hints =
-      ros::TransportHints().reliable().tcpNoDelay(true);
+  handleCommandSo.transport_hints = ros::TransportHints().reliable().tcpNoDelay(true);
   subHandleCommand = rosNode->subscribe(handleCommandSo);
 
   // Controller time control.
-#if GAZEBO_MAJOR_VERSION >= 9
   lastControllerUpdateTime = world->SimTime();
-#else
-  lastControllerUpdateTime = world->GetSimTime();
-#endif
 
   // Start callback queue.
-  callbackQueueThread =
-      boost::thread(boost::bind(&RobotiqHandPlugin::RosQueueThread, this));
+  callbackQueueThread = boost::thread(boost::bind(&RobotiqHandPlugin::RosQueueThread, this));
 
   // Connect to gazebo world update.
-  updateConnection =
-      gazebo::event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&RobotiqHandPlugin::UpdateStates, this));
+  updateConnection = gazebo::event::Events::ConnectWorldUpdateBegin(
+      boost::bind(&RobotiqHandPlugin::UpdateStates, this));
 
   // Log information.
   ROS_INFO_STREAM("RobotiqHandPlugin loaded for " << side << " hand.");
@@ -306,22 +312,13 @@ bool RobotiqHandPlugin::IsHandFullyOpen()
 
   // The hand will be fully open when all the fingers are within 'tolerance'
   // from their lower limits.
-#if GAZEBO_MAJOR_VERSION >= 9
   ignition::math::Angle tolerance;
   tolerance.Degree(1.0);
-#else
-  gazebo::math::Angle tolerance;
-  tolerance.SetFromDegree(1.0);
-#endif
 
   for (int i = 2; i < NumJoints; ++i)
   {
     fingersOpen = fingersOpen &&
-                  #if GAZEBO_MAJOR_VERSION >= 9
                   (joints[i]->Position(0) < (joints[i]->LowerLimit(0) + tolerance()));
-#else
-    (joints[i]->GetAngle(0) < (joints[i]->GetLowerLimit(0) + tolerance));
-#endif
   }
 
   return fingersOpen;
@@ -331,11 +328,7 @@ bool RobotiqHandPlugin::IsHandFullyOpen()
 void RobotiqHandPlugin::UpdateStates()
 {
   boost::mutex::scoped_lock lock(controlMutex);
-#if GAZEBO_MAJOR_VERSION >= 9
   gazebo::common::Time curTime = world->SimTime();
-#else
-  gazebo::common::Time curTime = world->GetSimTime();
-#endif
 
   // Step 1: State transitions.
   if (curTime > lastControllerUpdateTime)
@@ -370,8 +363,7 @@ void RobotiqHandPlugin::UpdateStates()
         lastHandleCommand = handleCommand;
 
         // Update the grasping mode.
-        graspingMode =
-            static_cast<GraspingMode>(handleCommand.rMOD);
+        graspingMode = static_cast<GraspingMode>(handleCommand.rMOD);
       } else if (handState != ChangeModeInProgress)
       {
         handState = Simplified;
@@ -439,8 +431,7 @@ void RobotiqHandPlugin::UpdateStates()
         break;
 
       default:
-        std::cerr << "Unrecognized state [" << handState << "]"
-                  << std::endl;
+        std::cerr << "Unrecognized state [" << handState << "]" << std::endl;
     }
 
     // Update the hand controller.
@@ -457,9 +448,8 @@ void RobotiqHandPlugin::UpdateStates()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-uint8_t RobotiqHandPlugin::GetObjectDetection(
-    const gazebo::physics::JointPtr &_joint, int _index, uint8_t _rPR,
-    uint8_t _prevrPR)
+uint8_t RobotiqHandPlugin::GetObjectDetection(const gazebo::physics::JointPtr &_joint, int _index, uint8_t _rPR,
+                                              uint8_t _prevrPR)
 {
   // Check finger's speed.
   bool isMoving = _joint->GetVelocity(0) > VelTolerance;
@@ -493,32 +483,19 @@ uint8_t RobotiqHandPlugin::GetObjectDetection(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-uint8_t RobotiqHandPlugin::GetCurrentPosition(
-    const gazebo::physics::JointPtr &_joint)
+uint8_t RobotiqHandPlugin::GetCurrentPosition(const gazebo::physics::JointPtr &_joint) const
 {
   // Full range of motion.
-#if GAZEBO_MAJOR_VERSION >= 9
   ignition::math::Angle range = _joint->UpperLimit(0) - _joint->LowerLimit(0);
-#else
-  gazebo::math::Angle range = _joint->GetUpperLimit(0) - _joint->GetLowerLimit(0);
-#endif
 
   // The maximum value in pinch mode is 177.
   if (graspingMode == Pinch)
     range *= 177.0 / 255.0;
 
   // Angle relative to the lower limit.
-#if GAZEBO_MAJOR_VERSION >= 9
   ignition::math::Angle relAngle = _joint->Position(0) - _joint->LowerLimit(0);
-#else
-  gazebo::math::Angle relAngle = _joint->GetAngle(0) - _joint->GetLowerLimit(0);
-#endif
 
-#if GAZEBO_MAJOR_VERSION >= 9
   return static_cast<uint8_t>(round(255.0 * relAngle() / range()));
-#else
-  static_cast<uint8_t>(round(255.0 * relAngle.Radian() / range.Radian()));
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -535,11 +512,15 @@ void RobotiqHandPlugin::GetAndPublishHandleState()
 
   // gIMC. Gripper status.
   if (handState == Emergency)
+  {
     handleState.gIMC = 0;
-  else if (handState == ChangeModeInProgress)
+  } else if (handState == ChangeModeInProgress)
+  {
     handleState.gIMC = 2;
-  else
+  } else
+  {
     handleState.gIMC = 3;
+  }
 
   // Check fingers' speed.
   bool isMovingA = joints[2]->GetVelocity(0) > VelTolerance;
@@ -578,30 +559,31 @@ void RobotiqHandPlugin::GetAndPublishHandleState()
   }
 
   // gDTA. Finger A object detection.
-  handleState.gDTA = GetObjectDetection(joints[2], 2,
-                                        handleCommand.rPRA, prevCommand.rPRA);
+  handleState.gDTA = GetObjectDetection(joints[2], 2, handleCommand.rPRA, prevCommand.rPRA);
 
   // gDTB. Finger B object detection.
-  handleState.gDTB = GetObjectDetection(joints[3], 3,
-                                        handleCommand.rPRB, prevCommand.rPRB);
+  handleState.gDTB = GetObjectDetection(joints[3], 3, handleCommand.rPRB, prevCommand.rPRB);
 
   // gDTC. Finger C object detection
-  handleState.gDTC = GetObjectDetection(joints[4], 4,
-                                        handleCommand.rPRC, prevCommand.rPRC);
+  handleState.gDTC = GetObjectDetection(joints[4], 4, handleCommand.rPRC, prevCommand.rPRC);
 
   // gDTS. Scissor object detection. We use finger A as a reference.
-  handleState.gDTS = GetObjectDetection(joints[0], 0,
-                                        handleCommand.rPRS, prevCommand.rPRS);
+  handleState.gDTS = GetObjectDetection(joints[0], 0, handleCommand.rPRS, prevCommand.rPRS);
 
   // gFLT. Fault status.
   if (handState == ChangeModeInProgress)
+  {
     handleState.gFLT = 6;
-  else if (handState == Disabled)
+  } else if (handState == Disabled)
+  {
     handleState.gFLT = 7;
-  else if (handState == Emergency)
+  } else if (handState == Emergency)
+  {
     handleState.gFLT = 11;
-  else
+  } else
+  {
     handleState.gFLT = 0;
+  }
 
   // gPRA. Echo of requested position for finger A.
   handleState.gPRA = userHandleCommand.rPRA;
@@ -636,17 +618,12 @@ void RobotiqHandPlugin::GetAndPublishHandleState()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void RobotiqHandPlugin::GetAndPublishJointState(
-    const gazebo::common::Time &_curTime)
+void RobotiqHandPlugin::GetAndPublishJointState(const gazebo::common::Time &_curTime)
 {
   jointStates.header.stamp = ros::Time(_curTime.sec, _curTime.nsec);
   for (size_t i = 0; i < joints.size(); ++i)
   {
-#if GAZEBO_MAJOR_VERSION >= 9
     jointStates.position[i] = joints[i]->Position(0);
-#else
-    jointStates.position[i] = joints[i]->GetAngle(0).Radian();
-#endif
     jointStates.velocity[i] = joints[i]->GetVelocity(0);
     // better to use GetForceTorque dot joint axis
     jointStates.effort[i] = joints[i]->GetForce(0u);
@@ -660,7 +637,9 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
   if (handState == Disabled)
   {
     for (int i = 0; i < NumJoints; ++i)
+    {
       fingerJoints[i]->SetForce(0, 0.0);
+    }
 
     return;
   }
@@ -668,18 +647,13 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
   for (int i = 0; i < NumJoints; ++i)
   {
     double targetPose = 0.0;
-    double targetSpeed = (MinVelocity + MaxVelocity) / 2.0;
 
     if (i == 0)
     {
       switch (graspingMode)
       {
         case Wide:
-#if GAZEBO_MAJOR_VERSION >= 9
           targetPose = joints[i]->UpperLimit(0);
-#else
-          targetPose = joints[i]->GetUpperLimit(0).Radian();
-#endif
           break;
 
         case Pinch:
@@ -689,16 +663,12 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
 
         case Scissor:
           // Max position is reached at value 215.
-#if GAZEBO_MAJOR_VERSION >= 9
           targetPose = joints[i]->UpperLimit(0) -
                        (joints[i]->UpperLimit(0) -
                         joints[i]->LowerLimit(0)) * (215.0 / 255.0)
-                       #else
-                       targetPose = joints[i]->GetUpperLimit(0).Radian() -
-            (joints[i]->GetUpperLimit(0).Radian() -
-             joints[i]->GetLowerLimit(0).Radian()) * (215.0 / 255.0)
-                       #endif
                        * handleCommand.rPRA / 255.0;
+          break;
+        case Basic:
           break;
       }
     } else if (i == 1)
@@ -706,11 +676,7 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
       switch (graspingMode)
       {
         case Wide:
-#if GAZEBO_MAJOR_VERSION >= 9
           targetPose = joints[i]->LowerLimit(0);
-#else
-          targetPose = joints[i]->GetLowerLimit(0).Radian();
-#endif
           break;
 
         case Pinch:
@@ -720,16 +686,12 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
 
         case Scissor:
           // Max position is reached at value 215.
-#if GAZEBO_MAJOR_VERSION >= 9
           targetPose = joints[i]->LowerLimit(0) +
                        (joints[i]->UpperLimit(0) -
                         joints[i]->LowerLimit(0)) * (215.0 / 255.0)
-                       #else
-                       targetPose = joints[i]->GetLowerLimit(0).Radian() +
-            (joints[i]->GetUpperLimit(0).Radian() -
-             joints[i]->GetLowerLimit(0).Radian()) * (215.0 / 255.0)
-                       #endif
                        * handleCommand.rPRA / 255.0;
+          break;
+        case Basic:
           break;
       }
     } else if (i >= 2 && i <= 4)
@@ -737,42 +699,23 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
       if (graspingMode == Pinch)
       {
         // Max position is reached at value 177.
-#if GAZEBO_MAJOR_VERSION >= 9
         targetPose = joints[i]->LowerLimit(0) +
                      (joints[i]->UpperLimit(0) -
                       joints[i]->LowerLimit(0)) * (177.0 / 255.0)
-                     #else
-                     targetPose = joints[i]->GetLowerLimit(0).Radian() +
-          (joints[i]->GetUpperLimit(0).Radian() -
-           joints[i]->GetLowerLimit(0).Radian()) * (177.0 / 255.0)
-                     #endif
                      * handleCommand.rPRA / 255.0;
       } else if (graspingMode == Scissor)
       {
-        targetSpeed = MinVelocity +
-                      ((MaxVelocity - MinVelocity) *
-                       handleCommand.rSPA / 255.0);
       } else
       {
-#if GAZEBO_MAJOR_VERSION >= 9
         targetPose = joints[i]->LowerLimit(0) +
                      (joints[i]->UpperLimit(0) -
                       joints[i]->LowerLimit(0))
-                     #else
-                     targetPose = joints[i]->GetLowerLimit(0).Radian() +
-          (joints[i]->GetUpperLimit(0).Radian() -
-           joints[i]->GetLowerLimit(0).Radian())
-                     #endif
                      * handleCommand.rPRA / 255.0;
       }
     }
 
     // Get the current pose.
-#if GAZEBO_MAJOR_VERSION >= 9
     double currentPose = joints[i]->Position(0);
-#else
-    double currentPose = joints[i]->GetAngle(0).Radian();
-#endif
 
     // Position error.
     double poseError = currentPose - targetPose;
@@ -786,8 +729,7 @@ void RobotiqHandPlugin::UpdatePIDControl(double _dt)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-bool RobotiqHandPlugin::GetAndPushBackJoint(const std::string &_jointName,
-                                            gazebo::physics::Joint_V &_joints)
+bool RobotiqHandPlugin::GetAndPushBackJoint(const std::string &_jointName, gazebo::physics::Joint_V &_joints) const
 {
   gazebo::physics::JointPtr joint = model->GetJoint(_jointName);
 

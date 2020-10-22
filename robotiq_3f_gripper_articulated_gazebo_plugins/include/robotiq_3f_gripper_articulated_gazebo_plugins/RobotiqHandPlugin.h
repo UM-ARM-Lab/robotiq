@@ -132,7 +132,7 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
   /// \param[in] _joint Finger joint.
   /// \return The actual position of the finger. 0 is the minimum position
   /// (fully open) and 255 is the maximum position (fully closed).
-  uint8_t GetCurrentPosition(const gazebo::physics::JointPtr &_joint);
+  uint8_t GetCurrentPosition(const gazebo::physics::JointPtr &_joint) const;
 
   /// \brief Internal helper to reduce code duplication. If the joint name is
   /// found, a pointer to the joint is added to a vector of joint pointers.
@@ -140,7 +140,7 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
   /// \param[out] _joints Vector of joint pointers.
   /// \return True when the joint was found or false otherwise.
   bool GetAndPushBackJoint(const std::string &_jointName,
-                           gazebo::physics::Joint_V &_joints);
+                           gazebo::physics::Joint_V &_joints) const;
 
   /// \brief Verify that one command field is within the correct range.
   /// \param[in] _label Label of the field. E.g.: rACT, rMOD.
