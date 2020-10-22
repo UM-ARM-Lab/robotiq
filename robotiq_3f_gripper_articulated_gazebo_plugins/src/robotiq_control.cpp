@@ -244,7 +244,11 @@ void RobotiqControl::UpdateStates()
         break;
 
       case ICS:
-        std::cerr << "Individual Control of Scissor not supported" << std::endl;
+        if (handleCommand.rGTO == 0)
+        {
+          // "Stop" action.
+          StopHand();
+        }
         break;
 
       case ICF:
@@ -336,7 +340,9 @@ uint8_t RobotiqControl::GetCurrentPosition(const gazebo::physics::JointPtr &_joi
 
   // The maximum value in pinch mode is 177.
   if (graspingMode == Pinch)
+  {
     range *= 177.0 / 255.0;
+  }
 
   // Angle relative to the lower limit.
   ignition::math::Angle relAngle = _joint->Position(0) - _joint->LowerLimit(0);
@@ -466,7 +472,7 @@ robotiq_3f_gripper_articulated_msgs::Robotiq3FGripperRobotInput RobotiqControl::
 ////////////////////////////////////////////////////////////////////////////////
 void RobotiqControl::UpdatePIDControl(double _dt)
 {
-  //
+  // TODO: this shouldn't be a for-loop, each joint should be named
   for (int i = 0; i < NumJoints; ++i)
   {
     double targetPose = 0.0;
@@ -489,7 +495,7 @@ void RobotiqControl::UpdatePIDControl(double _dt)
           targetPose = joints[i]->UpperLimit(0) -
                        (joints[i]->UpperLimit(0) -
                         joints[i]->LowerLimit(0)) * (215.0 / 255.0)
-                       * handleCommand.rPRA / 255.0;
+                       * handleCommand.rPRS / 255.0;
           break;
         case Basic:
           break;
@@ -512,12 +518,12 @@ void RobotiqControl::UpdatePIDControl(double _dt)
           targetPose = joints[i]->LowerLimit(0) +
                        (joints[i]->UpperLimit(0) -
                         joints[i]->LowerLimit(0)) * (215.0 / 255.0)
-                       * handleCommand.rPRA / 255.0;
+                       * handleCommand.rPRS / 255.0;
           break;
         case Basic:
           break;
       }
-    } else if (i >= 2 && i <= 4)
+    } else if (i == 2)
     {
       if (graspingMode == Pinch)
       {
@@ -526,8 +532,6 @@ void RobotiqControl::UpdatePIDControl(double _dt)
                      (joints[i]->UpperLimit(0) -
                       joints[i]->LowerLimit(0)) * (177.0 / 255.0)
                      * handleCommand.rPRA / 255.0;
-      } else if (graspingMode == Scissor)
-      {
       } else
       {
         targetPose = joints[i]->LowerLimit(0) +
@@ -535,7 +539,41 @@ void RobotiqControl::UpdatePIDControl(double _dt)
                       joints[i]->LowerLimit(0))
                      * handleCommand.rPRA / 255.0;
       }
+    } else if (i == 3)
+    {
+      if (graspingMode == Pinch)
+      {
+        // Max position is reached at value 177.
+        targetPose = joints[i]->LowerLimit(0) +
+                     (joints[i]->UpperLimit(0) -
+                      joints[i]->LowerLimit(0)) * (177.0 / 255.0)
+                     * handleCommand.rPRB / 255.0;
+      } else
+      {
+        targetPose = joints[i]->LowerLimit(0) +
+                     (joints[i]->UpperLimit(0) -
+                      joints[i]->LowerLimit(0))
+                     * handleCommand.rPRB / 255.0;
+      }
+    } else if (i == 4)
+    {
+      if (graspingMode == Pinch)
+      {
+        // Max position is reached at value 177.
+        targetPose = joints[i]->LowerLimit(0) +
+                     (joints[i]->UpperLimit(0) -
+                      joints[i]->LowerLimit(0)) * (177.0 / 255.0)
+                     * handleCommand.rPRC / 255.0;
+      } else
+      {
+        targetPose = joints[i]->LowerLimit(0) +
+                     (joints[i]->UpperLimit(0) -
+                      joints[i]->LowerLimit(0))
+                     * handleCommand.rPRC / 255.0;
+      }
     }
+
+//    ROS_DEBUG_STREAM_NAMED(PLUGIN_LOG_NAME, "Target Positions for joint " << i << ": " << targetPose);
 
     // Get the current pose.
     double currentPose = joints[i]->Position(0);

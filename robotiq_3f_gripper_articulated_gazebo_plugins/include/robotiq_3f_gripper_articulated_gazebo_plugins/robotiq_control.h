@@ -29,6 +29,8 @@
 #include <robotiq_3f_gripper_articulated_msgs/Robotiq3FGripperRobotInput.h>
 #include <robotiq_3f_gripper_articulated_msgs/Robotiq3FGripperRobotOutput.h>
 
+constexpr auto const PLUGIN_LOG_NAME = "robotiq_hand_plugin";
+
 /// \brief A plugin that implements the Robotiq 3-Finger Adaptative Gripper.
 /// The plugin exposes the next parameters via SDF tags:
 ///   * <side> Determines if we are controlling the left or right hand. This is
@@ -47,6 +49,7 @@
 ///                     This parameter is optional.
 ///   * <topic_state> ROS topic name used to receive state from the hand.
 ///                   This parameter is optional.
+
 class RobotiqControl
 {
 
