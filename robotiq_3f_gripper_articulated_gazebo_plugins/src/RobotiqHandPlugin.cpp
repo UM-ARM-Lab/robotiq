@@ -60,8 +60,8 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sd
 
   // Overload the PID parameters if they are available.
   auto const &kp = get(sdf, "kp_position", 1.0);
-  auto const &ki = get(sdf, "kp_position", 0.0);
-  auto const &kd = get(sdf, "kp_position", 0.5);
+  auto const &ki = get(sdf, "ki_position", 0.0);
+  auto const &kd = get(sdf, "kd_position", 0.5);
   control_ = std::make_unique<RobotiqControl>(model, kp, ki, kd, side);
 
   // Start callback queue.
