@@ -13,12 +13,12 @@ robotiq-3f-gripper_articulated - articulated version of the robotiq robotiq-3f-g
                 <origin xyz="0 0 0.1" rpy="0 0 0" />
         </xacro:robotiq_hand>
 
-        <gazebo>
-                <plugin name="RobotiqHandPlugin" filename="libRobotiqHandPlugin.so">
-                        <side>left</side>
-                        <kp_position>5</kp_position>
-                </plugin>
-        </gazebo>
+<!--        <gazebo>-->
+<!--                <plugin name="RobotiqHandPlugin" filename="libRobotiqHandPlugin.so">-->
+<!--                        <side>left</side>-->
+<!--                        <kp_position>5</kp_position>-->
+<!--                </plugin>-->
+<!--        </gazebo>-->
 
 <!--
         <xacro:include filename="$(find robotiq_3f_gripper_visualization)/cfg/robotiq-3f-gripper_finger_articulated_macro.xacro" />
