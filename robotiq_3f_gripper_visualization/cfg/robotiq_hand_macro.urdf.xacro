@@ -648,7 +648,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
             <axis xyz="0 0 1"/>
             <parent link="${prefix}link_0"/>
             <child link="${prefix}link_1"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <!-- Limits: [0deg.,70deg.] -->
             <limit effort="60" velocity="-1" lower="0" upper="1.2217"/>
         </joint>
@@ -661,7 +661,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         <joint name="${prefix}joint_2" type="revolute">
             <parent link="${prefix}link_1"/>
             <child link="${prefix}link_2"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <axis xyz="0 0 1"/>
             <origin rpy="0 0 0" xyz="0 0.05715 0"/>
             <!-- Limits: [0deg.,90deg.] -->
@@ -676,7 +676,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         <joint name="${prefix}joint_3" type="revolute">
             <parent link="${prefix}link_2"/>
             <child link="${prefix}link_3"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <axis xyz="0 0 1"/>
             <origin rpy="0 0 ${3.1416/2 + 0.5198}" xyz="0 0.039 0"/>
             <!-- Limits: [-38deg.,60deg.] -->
@@ -847,7 +847,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         <joint name="${prefix}palm_finger_1_joint" type="revolute">
             <parent link="${prefix}palm"/>
             <child link="${prefix}finger_1_link_0"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <axis xyz="0 1 0"/>
             <origin rpy="0 3.1416 -1.57" xyz="-0.0455 0.0214 0.036"/>
             <!-- Limits: [-17deg.,17deg.] -->
@@ -862,7 +862,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         <joint name="${prefix}palm_finger_2_joint" type="revolute">
             <parent link="${prefix}palm"/>
             <child link="${prefix}finger_2_link_0"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <axis xyz="0 1 0"/>
             <origin rpy="0 3.1416 -1.57" xyz="-0.0455 0.0214 -0.036"/>
             <!-- Limits: [-17deg.,17deg.] -->
@@ -877,7 +877,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         <joint name="${prefix}palm_finger_middle_joint" type="revolute">
             <parent link="${prefix}palm"/>
             <child link="${prefix}finger_middle_link_0"/>
-            <dynamics damping="1" friction="0"/>
+            <dynamics damping="0.1" friction="0"/>
             <axis xyz="0 1 0"/>
             <origin rpy="0 0 1.57" xyz="0.0455 0.0214 0"/>
             <limit lower="0" upper="0" effort="60" velocity="-1"/>
