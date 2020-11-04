@@ -56,6 +56,8 @@ void RobotiqHandPlugin::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sd
   auto const status_topic_name = get<std::string>(sdf, "topic_status", "gripper_status");
   status_pub_ = ph_->advertise<victor_hardware_interface_msgs::Robotiq3FingerStatus>(status_topic_name, 10);
 
+  // TODO: publish joint states and gripper statuses
+
   // Subscribe to user published handle control commands.
   auto const command_topic_name = get<std::string>(sdf, "topic_command", "gripper_command");
   auto gripper_command_sub_options = ros::SubscribeOptions::create<victor_hardware_interface_msgs::Robotiq3FingerCommand>(

@@ -8,7 +8,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
 -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robotiq_hand">
 
-    <xacro:macro name="robotiq_finger" params="prefix">
+    <xacro:macro name="robotiq_finger" params="prefix kinematic">
         <!-- Link list -->
 
         <!-- Link 0 -->
@@ -39,6 +39,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_0">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -81,6 +82,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_1">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -121,6 +123,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_2">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -161,6 +164,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_3">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -199,6 +203,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_proximal_actuating_hinge">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -238,6 +243,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_paraproximal_actuating_hinge">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -276,6 +282,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_proximal_actuating_bar">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -314,6 +321,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_paraproximal_bar">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -352,6 +360,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_median_actuating_hinge">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -390,6 +399,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_median_bar">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -428,6 +438,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_paramedian_hinge">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -466,6 +477,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_median_bar_underactuated">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -504,6 +516,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}link_paradistal_hinge">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
@@ -785,7 +798,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </gazebo>
     </xacro:macro>
 
-    <xacro:macro name="robotiq_hand" params="prefix *origin parent">
+    <xacro:macro name="robotiq_hand" params="prefix *origin parent kinematic">
 
         <!-- joint attaching parent link to robotiq hand -->
         <joint name="${prefix}robotiq_hand_joint" type="fixed">
@@ -795,9 +808,9 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </joint>
 
         <!-- Insert the fingers -->
-        <xacro:robotiq_finger prefix="${prefix}finger_1_"/>
-        <xacro:robotiq_finger prefix="${prefix}finger_2_"/>
-        <xacro:robotiq_finger prefix="${prefix}finger_middle_"/>
+        <xacro:robotiq_finger prefix="${prefix}finger_1_" kinematic="${kinematic}"/>
+        <xacro:robotiq_finger prefix="${prefix}finger_2_" kinematic="${kinematic}"/>
+        <xacro:robotiq_finger prefix="${prefix}finger_middle_" kinematic="${kinematic}"/>
 
         <!-- link list -->
 
@@ -829,6 +842,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </link>
 
         <gazebo reference="${prefix}palm">
+            <kinematic>${kinematic}</kinematic>
             <mu1>1.1</mu1>
             <mu2>1.1</mu2>
             <visual>
