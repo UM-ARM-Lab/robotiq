@@ -313,7 +313,7 @@ there are multiple hands then a prefix followed by an "_" is needed.
         </gazebo>
 
         <!-- Joint palm_finger_middle_joint -->
-        <joint name="${prefix}palm_finger_middle_joint" type="revolute">
+        <joint name="${prefix}palm_finger_middle_joint" type="fixed">
             <parent link="${prefix}palm"/>
             <child link="${prefix}finger_middle_link_0"/>
             <dynamics damping="0.1" friction="0"/>
