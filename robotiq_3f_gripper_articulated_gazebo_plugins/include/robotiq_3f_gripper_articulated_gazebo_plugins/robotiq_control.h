@@ -224,9 +224,6 @@ class RobotiqControl
   /// \brief Used to select between 'left' or 'right' hand.
   std::string side_;
 
-  /// \brief Vector containing all the joint names.
-  std::vector<std::string> jointNames;
-
   /// \brief Vector containing all the actuated finger joints.
   gazebo::physics::Joint_V fingerJoints;
 

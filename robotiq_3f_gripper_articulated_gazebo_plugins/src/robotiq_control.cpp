@@ -623,7 +623,6 @@ bool RobotiqControl::FindJoints()
     return false;
   if (!GetAndPushBackJoint(prefix + suffix, fingerJoints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // palm_finger_2_joint (actuated).
   suffix = "palm_finger_2_joint";
@@ -631,7 +630,6 @@ bool RobotiqControl::FindJoints()
     return false;
   if (!GetAndPushBackJoint(prefix + suffix, fingerJoints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // We read the joint state from finger_1_joint_1
   // but we actuate finger_1_joint_proximal_actuating_hinge (actuated).
@@ -641,7 +639,6 @@ bool RobotiqControl::FindJoints()
   suffix = "finger_1_joint_1";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // We read the joint state from finger_2_joint_1
   // but we actuate finger_2_proximal_actuating_hinge (actuated).
@@ -651,7 +648,6 @@ bool RobotiqControl::FindJoints()
   suffix = "finger_2_joint_1";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // We read the joint state from finger_middle_joint_1
   // but we actuate finger_middle_proximal_actuating_hinge (actuated).
@@ -661,7 +657,6 @@ bool RobotiqControl::FindJoints()
   suffix = "finger_middle_joint_1";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // palm_finger_1_joint (actuated).
   // palm_finger_2_joint (actuated).
@@ -673,43 +668,31 @@ bool RobotiqControl::FindJoints()
   suffix = "finger_1_joint_2";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // finger_1_joint_3 (underactuated).
   suffix = "finger_1_joint_3";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // finger_2_joint_2 (underactuated).
   suffix = "finger_2_joint_2";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // finger_2_joint_3 (underactuated).
   suffix = "finger_2_joint_3";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
-
-  // palm_finger_middle_joint (underactuated).
-  suffix = "palm_finger_middle_joint";
-  if (!GetAndPushBackJoint(prefix + suffix, joints))
-    return false;
-  jointNames.push_back(prefix + suffix);
 
   // finger_middle_joint_2 (underactuated).
   suffix = "finger_middle_joint_2";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   // finger_middle_joint_3 (underactuated).
   suffix = "finger_middle_joint_3";
   if (!GetAndPushBackJoint(prefix + suffix, joints))
     return false;
-  jointNames.push_back(prefix + suffix);
 
   return true;
 }
